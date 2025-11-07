@@ -3,17 +3,18 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "openvla-oft"
+name = "moxinvla-oft"
 authors = [
+    {name = "Arash Akbarinia"},
     {name = "Moo Jin Kim", email="moojink@stanford.edu"},
     {name = "Chelsea Finn", email="cbfinn@cs.stanford.edu"},
     {name = "Percy Liang", email="pliang@cs.stanford.edu"},
 ]
-description = "Fine-Tuning Vision-Language-Action Models: Optimizing Speed and Success"
-version = "0.0.1"
+description = "MoxinVLA-OFT: Fine-Tuning Vision-Language-Action Models with Moxin LLM"
+version = "0.1.0"
 readme = "README.md"
 requires-python = ">=3.8"
-keywords = ["vision-language-actions models", "fine-tuning", "robot learning"]
+keywords = ["vision-language-actions models", "fine-tuning", "robot learning", "moxin", "vla"]
 license = {file = "LICENSE"}
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -74,9 +75,10 @@ sagemaker = [
 ]
 
 [project.urls]
-homepage = "https://github.com/moojink/openvla-oft"
-repository = "https://github.com/moojink/openvla-oft"
-documentation = "https://github.com/moojink/openvla-oft"
+homepage = "https://github.com/arashakb/moxinvla-oft"
+repository = "https://github.com/arashakb/moxinvla-oft"
+documentation = "https://github.com/arashakb/moxinvla-oft"
+"Original OpenVLA-OFT" = "https://github.com/moojink/openvla-oft"
 
 [tool.setuptools.packages.find]
 where = ["."]
