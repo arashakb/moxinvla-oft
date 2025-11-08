@@ -1,93 +1,294 @@
-# Fine-Tuning Vision-Language-Action Models: Optimizing Speed and Success
+# MoxinVLA-OFT: Vision-Language-Action Model with Moxin LLM
 
-**Project website: https://openvla-oft.github.io/**
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-**Paper: https://arxiv.org/abs/2502.19645**
+**MoxinVLA-OFT** is a fine-tuning framework for Vision-Language-Action (VLA) models that uses the **Moxin** large language model as the language backbone, built upon the [OpenVLA-OFT](https://github.com/moojink/openvla-oft) framework.
 
-**Summary video: https://youtu.be/T3Zkkr_NTSA**
+---
 
-## System Requirements
+## 📋 Table of Contents
 
-Inference:
-* 1 GPU with ~16 GB VRAM for LIBERO sim benchmark tasks
-* 1 GPU with ~18 GB VRAM for ALOHA robot tasks
+- [What is MoxinVLA?](#-what-is-moxinvla)
+- [What is Moxin?](#-what-is-moxin)
+- [Key Features](#-key-features)
+- [System Requirements](#-system-requirements)
+- [Installation](#-installation)
+  - [General Setup](#general-setup)
+  - [LIBERO Setup](#libero-setup)
+- [Quick Start](#-quick-start)
+- [Training & Evaluation](#-training--evaluation)
+- [Pretrained Models](#-pretrained-models)
+- [Project Structure](#-project-structure)
+- [Citation](#-citation)
+- [Acknowledgements](#-acknowledgements)
+- [License](#-license)
 
-Training:
-* Between 1-8 GPUs with 27-80 GB, depending on the desired training setup (with default bfloat16 data type). See [this FAQ on our project website](https://openvla-oft.github.io/#train-compute) for details.
+---
 
-## Quick Start
+## 🤖 What is MoxinVLA?
 
-First, set up a conda environment (see instructions in [SETUP.md](SETUP.md)).
+**MoxinVLA-OFT** adapts the OpenVLA architecture to use **Moxin**, an open-source large language model, as the language backbone instead of the original LLaMA-2/Vicuna models. This enables:
 
-Then, run the Python script below to download a pretrained OpenVLA-OFT checkpoint and run inference to generate an action chunk:
+- Training VLA models with an alternative LLM backbone
+- Exploring the impact of different language models on robotic manipulation
+- Fine-tuning on custom robot datasets using the OFT (Optimized Fine-Tuning) methodology
+
+The model architecture follows the OpenVLA design: a vision encoder (DINOv2 + SigLIP) combined with a language model (Moxin) to output continuous robot actions.
+
+---
+
+## 🧠 What is Moxin?
+
+**Moxin** is an open-source 7B parameter large language model based on the Mistral architecture. It is developed by [moxin-org](https://huggingface.co/moxin-org) and serves as the language backbone in MoxinVLA.
+
+**Key characteristics:**
+- 7 billion parameters
+- Based on Mistral architecture
+- Compatible with MistralForCausalLM
+- Available on HuggingFace: [`moxin-org/moxin-llm-7b`](https://huggingface.co/moxin-org/moxin-llm-7b)
+
+---
+
+## ✨ Key Features
+
+- **Moxin LLM Integration**: Uses Moxin as the language backbone
+- **OFT Fine-tuning**: Efficient fine-tuning with LoRA (rank-32)
+- **Multi-camera Support**: Handles 1-3 camera inputs (third-person + wrist cameras)
+- **Proprioceptive State**: Includes robot joint state in the model input
+- **LIBERO Support**: Fine-tune and evaluate on LIBERO benchmark tasks
+- **ALOHA Support**: Fine-tune on real-world ALOHA robot data
+- **Simple Logging**: Clean logging system for training and evaluation
+- **WandB Integration**: Optional Weights & Biases logging
+
+---
+
+## 💻 System Requirements
+
+### Inference
+- 1 GPU with ~16 GB VRAM for LIBERO simulation tasks
+- 1 GPU with ~18 GB VRAM for ALOHA robot tasks
+
+### Training
+- **Minimum**: 1 GPU with 27+ GB VRAM (e.g., RTX 3090, A6000)
+- **Recommended**: 4-8 GPUs with 40-80 GB VRAM (e.g., A100, H100)
+- Training time varies: ~6-12 hours for 50K steps on 8xH100
+
+**Note**: Training performance may vary across different GPU types. It's recommended to test and evaluate on the same GPU used for training.
+
+---
+
+## 🚀 Installation
+
+### General Setup
+
+1. **Create conda environment**
+```bash
+conda create -n moxinvla-oft python=3.10 -y
+conda activate moxinvla-oft
+```
+
+2. **Install PyTorch**
+```bash
+# For CUDA 11.8 (adjust based on your system)
+pip3 install torch==2.2.0 torchvision==0.17.0 torchaudio==2.2.0 --index-url https://download.pytorch.org/whl/cu118
+```
+
+3. **Clone and install MoxinVLA-OFT**
+```bash
+git clone https://github.com/arashakb/moxinvla-oft.git
+cd moxinvla-oft
+pip install -e .
+```
+
+4. **Install Flash Attention 2** (required for training)
+```bash
+pip install packaging ninja
+ninja --version  # Should return 0
+pip install "flash-attn==2.5.5" --no-build-isolation
+```
+
+> **Troubleshooting**: If Flash Attention installation fails, try `pip cache remove flash_attn` first.
+
+### LIBERO Setup
+
+To train or evaluate on LIBERO benchmark:
+
+1. **Install LIBERO**
+```bash
+git clone https://github.com/Lifelong-Robot-Learning/LIBERO.git
+pip install -e LIBERO
+```
+
+2. **Install LIBERO requirements**
+```bash
+pip install -r experiments/robot/libero/libero_requirements.txt
+```
+
+3. **(Optional) Download LIBERO datasets**
+
+If you plan to fine-tune, download the preprocessed LIBERO datasets (~10 GB):
+```bash
+git clone https://huggingface.co/datasets/openvla/modified_libero_rlds
+```
+
+This includes:
+- LIBERO-Spatial
+- LIBERO-Object
+- LIBERO-Goal
+- LIBERO-10 (Long)
+
+> **Note**: Pretrained checkpoints are provided, so dataset download is optional if you only want to evaluate.
+
+---
+
+## 🎯 Quick Start
+
+### Basic Inference Example
 
 ```python
 import pickle
 from experiments.robot.libero.run_libero_eval import GenerateConfig
-from experiments.robot.openvla_utils import get_action_head, get_processor, get_proprio_projector, get_vla, get_vla_action
+from experiments.robot.openvla_utils import (
+    get_action_head, get_processor, get_proprio_projector, get_vla, get_vla_action
+)
 from prismatic.vla.constants import NUM_ACTIONS_CHUNK, PROPRIO_DIM
 
-# Instantiate config (see class GenerateConfig in experiments/robot/libero/run_libero_eval.py for definitions)
+# Configure the model
 cfg = GenerateConfig(
-    pretrained_checkpoint = "moojink/openvla-7b-oft-finetuned-libero-spatial",
-    use_l1_regression = True,
-    use_diffusion = False,
-    use_film = False,
-    num_images_in_input = 2,
-    use_proprio = True,
-    load_in_8bit = False,
-    load_in_4bit = False,
-    center_crop = True,
-    num_open_loop_steps = NUM_ACTIONS_CHUNK,
-    unnorm_key = "libero_spatial_no_noops",
+    pretrained_checkpoint="path/to/your/checkpoint",
+    use_l1_regression=True,
+    use_diffusion=False,
+    use_film=False,
+    num_images_in_input=2,
+    use_proprio=True,
+    center_crop=True,
+    unnorm_key="libero_spatial_no_noops",
 )
 
-# Load OpenVLA-OFT policy and inputs processor
+# Load model components
 vla = get_vla(cfg)
 processor = get_processor(cfg)
-
-# Load MLP action head to generate continuous actions (via L1 regression)
 action_head = get_action_head(cfg, llm_dim=vla.llm_dim)
-
-# Load proprio projector to map proprio to language embedding space
 proprio_projector = get_proprio_projector(cfg, llm_dim=vla.llm_dim, proprio_dim=PROPRIO_DIM)
 
-# Load sample observation:
-#   observation (dict): {
-#     "full_image": primary third-person image,
-#     "wrist_image": wrist-mounted camera image,
-#     "state": robot proprioceptive state,
-#     "task_description": task description,
-#   }
-with open("experiments/robot/libero/sample_libero_spatial_observation.pkl", "rb") as file:
-    observation = pickle.load(file)
+# Load observation
+with open("experiments/robot/libero/sample_libero_spatial_observation.pkl", "rb") as f:
+    observation = pickle.load(f)
 
-# Generate robot action chunk (sequence of future actions)
-actions = get_vla_action(cfg, vla, processor, observation, observation["task_description"], action_head, proprio_projector)
-print("Generated action chunk:")
-for act in actions:
-    print(act)
+# Generate actions
+actions = get_vla_action(
+    cfg, vla, processor, observation, 
+    observation["task_description"], 
+    action_head, proprio_projector
+)
+
+print("Generated action chunk:", actions)
 ```
 
-## Installation
+---
 
-See [SETUP.md](SETUP.md) for instructions on setting up the conda environment.
+## 📚 Training & Evaluation
 
-## Training and Evaluation
+### Fine-tuning on LIBERO
 
-See [LIBERO.md](LIBERO.md) for fine-tuning/evaluating on LIBERO simulation benchmark task suites.
+**Using the training script:**
+```bash
+bash libero_finetune.sh
+```
 
-See [ALOHA.md](ALOHA.md) for fine-tuning/evaluating on real-world ALOHA robot tasks.
+**Manual training command:**
+```bash
+torchrun --standalone --nnodes 1 --nproc-per-node 8 vla-scripts/finetune.py \
+  --vla_path path/to/moxin-checkpoint \
+  --data_root_dir modified_libero_rlds_data \
+  --dataset_name libero_spatial_no_noops \
+  --run_root_dir logs/checkpoints/my-experiment \
+  --lora_rank 32 \
+  --batch_size 8 \
+  --learning_rate 3e-4 \
+  --use_film False \
+  --use_proprio True \
+  --num_images_in_input 2 \
+  --max_steps 50000
+```
 
-## Support
+**Configuration:**
+- Adjust `--nproc-per-node` based on available GPUs
+- Modify `--batch_size` based on GPU memory
+- Set `WANDB_MODE=disabled` to disable WandB logging
 
-If you run into any issues, please open a new GitHub issue. If you do not receive a response within 2 business days, please email Moo Jin Kim (moojink@cs.stanford.edu) to bring the issue to his attention.
+See [LIBERO.md](LIBERO.md) for detailed LIBERO training/evaluation instructions.
 
-## Citation
+See [ALOHA.md](ALOHA.md) for ALOHA robot setup and usage.
 
-If you use our code in your work, please cite [our paper](https://arxiv.org/abs/2502.19645):
+### Evaluation
+
+```bash
+bash libero_evaluation.sh
+```
+
+**Monitor logs:**
+```bash
+# Watch training progress
+tail -f logs/training/*.log
+
+# Watch evaluation progress
+tail -f logs/evaluation/*.log
+```
+
+---
+
+## 🏆 Pretrained Models
+
+> **Coming Soon**: Pretrained MoxinVLA checkpoints will be available on HuggingFace.
+
+Currently, you need to:
+1. Obtain Moxin base model weights from [moxin-org/moxin-llm-7b](https://huggingface.co/moxin-org/moxin-llm-7b)
+2. Convert to VLA format (instructions in repo)
+3. Fine-tune on your target dataset
+
+---
+
+## 📁 Project Structure
+
+```
+moxinvla-oft/
+├── prismatic/                  # Core VLA model code
+│   ├── models/
+│   │   └── backbones/llm/
+│   │       └── moxin.py       # Moxin LLM integration
+│   └── vla/                   # VLA-specific code
+├── vla-scripts/
+│   ├── finetune.py            # Fine-tuning script
+│   └── deploy.py              # Deployment script
+├── experiments/robot/
+│   ├── libero/                # LIBERO evaluation
+│   └── aloha/                 # ALOHA evaluation
+├── scripts/
+│   └── logging_utils.sh       # Logging utilities
+├── libero_finetune.sh         # LIBERO training script
+├── libero_evaluation.sh       # LIBERO evaluation script
+├── LIBERO.md                  # LIBERO documentation
+├── ALOHA.md                   # ALOHA documentation
+└── SETUP.md                   # Detailed setup instructions
+```
+
+---
+
+## 📖 Citation
+
+If you use MoxinVLA-OFT in your research, please cite both this work and the original OpenVLA-OFT paper:
 
 ```bibtex
+@misc{akbarinia2025moxinvla,
+  title={MoxinVLA-OFT: Fine-Tuning Vision-Language-Action Models with Moxin LLM},
+  author={Akbarinia, Arash},
+  year={2025},
+  url={https://github.com/arashakb/moxinvla-oft}
+}
+
 @article{kim2025fine,
   title={Fine-Tuning Vision-Language-Action Models: Optimizing Speed and Success},
   author={Kim, Moo Jin and Finn, Chelsea and Liang, Percy},
@@ -95,3 +296,54 @@ If you use our code in your work, please cite [our paper](https://arxiv.org/abs/
   year={2025}
 }
 ```
+
+---
+
+## 🙏 Acknowledgements
+
+This project builds upon the excellent work of:
+
+- **[OpenVLA-OFT](https://github.com/moojink/openvla-oft)** by Moo Jin Kim, Chelsea Finn, and Percy Liang
+- **[OpenVLA](https://github.com/openvla/openvla)** - The original OpenVLA project
+- **[Moxin](https://huggingface.co/moxin-org)** - The Moxin language model
+- **[LIBERO](https://github.com/Lifelong-Robot-Learning/LIBERO)** - Lifelong robot learning benchmark
+
+We are grateful to the original authors for making their code publicly available.
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+Original OpenVLA-OFT code is also under MIT License. Moxin model weights follow their respective license terms.
+
+---
+
+## 💬 Support
+
+If you encounter any issues or have questions:
+
+1. Check existing [GitHub Issues](https://github.com/arashakb/moxinvla-oft/issues)
+2. Open a new issue with:
+   - Detailed description of the problem
+   - Your environment (GPU, CUDA version, etc.)
+   - Steps to reproduce
+   - Error logs
+
+---
+
+## 🔧 Development Status
+
+This project is under active development. Contributions and feedback are welcome!
+
+- ✅ Moxin LLM integration
+- ✅ LIBERO fine-tuning and evaluation
+- ✅ Simple logging system
+- 🚧 Pretrained checkpoints (coming soon)
+- 🚧 ALOHA real-world deployment
+- 🚧 Additional documentation and tutorials
+
+---
+
+**Made with ❤️ for the robotics and AI community**
