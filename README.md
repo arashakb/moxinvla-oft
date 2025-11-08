@@ -124,6 +124,9 @@ pip install -e LIBERO
 2. **Install LIBERO requirements**
 ```bash
 pip install -r experiments/robot/libero/libero_requirements.txt
+# update the following packages to these specific versions to avoid conflicts
+pip install numpy==1.26.4
+pip install opencv-python==4.11.0.86
 ```
 
 3. **(Optional) Download LIBERO datasets**
