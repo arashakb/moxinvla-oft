@@ -19,11 +19,11 @@
   - [LIBERO Setup](#libero-setup)
 - [Quick Start](#-quick-start)
 - [Training & Evaluation](#-training--evaluation)
-- [Pretrained Models](#-pretrained-models)
+- [News & Updates](#-news--updates)
 - [Project Structure](#-project-structure)
-- [Citation](#-citation)
 - [Acknowledgements](#-acknowledgements)
 - [License](#-license)
+- [Support](#-support)
 
 ---
 
@@ -240,14 +240,16 @@ tail -f logs/evaluation/*.log
 
 ---
 
-## 🏆 Pretrained Models
+## 📰 News & Updates
 
-> **Coming Soon**: Pretrained MoxinVLA checkpoints will be available on HuggingFace.
+**🚀 Coming Soon**: We will be releasing pretrained MoxinVLA checkpoints fine-tuned on LIBERO benchmarks for the community to use and build upon.
 
-Currently, you need to:
-1. Obtain Moxin base model weights from [moxin-org/moxin-llm-7b](https://huggingface.co/moxin-org/moxin-llm-7b)
-2. Convert to VLA format (instructions in repo)
-3. Fine-tune on your target dataset
+**Current Status**: 
+- Base MoxinVLA model integration is complete
+- Fine-tuning and evaluation scripts are ready
+- Training on LIBERO benchmarks in progress
+
+Stay tuned for checkpoint releases on HuggingFace!
 
 ---
 
@@ -277,6 +279,7 @@ moxinvla-oft/
 
 ---
 
+<!--
 ## 📖 Citation
 
 If you use MoxinVLA-OFT in your research, please cite both this work and the original OpenVLA-OFT paper:
@@ -296,6 +299,7 @@ If you use MoxinVLA-OFT in your research, please cite both this work and the ori
   year={2025}
 }
 ```
+-->
 
 ---
 
@@ -322,27 +326,7 @@ Original OpenVLA-OFT code is also under MIT License. Moxin model weights follow 
 
 ## 💬 Support
 
-If you encounter any issues or have questions:
-
-1. Check existing [GitHub Issues](https://github.com/arashakb/moxinvla-oft/issues)
-2. Open a new issue with:
-   - Detailed description of the problem
-   - Your environment (GPU, CUDA version, etc.)
-   - Steps to reproduce
-   - Error logs
-
----
-
-## 🔧 Development Status
-
-This project is under active development. Contributions and feedback are welcome!
-
-- ✅ Moxin LLM integration
-- ✅ LIBERO fine-tuning and evaluation
-- ✅ Simple logging system
-- 🚧 Pretrained checkpoints (coming soon)
-- 🚧 ALOHA real-world deployment
-- 🚧 Additional documentation and tutorials
+For questions or issues, please open a [GitHub Issue](https://github.com/arashakb/moxinvla-oft/issues).
 
 ---
 
