@@ -92,7 +92,7 @@ conda activate moxinvla-oft
 2. **Install PyTorch**
 ```bash
 # For CUDA 11.8 (adjust based on your system)
-pip3 install torch==2.2.0 torchvision==0.17.0 torchaudio==2.2.0 --index-url https://download.pytorch.org/whl/cu118
+pip3 install torch==2.2.0 torchvision==0.17.0 transformers==4.40.1 tokenizers==0.19.1 timm==0.9.10
 ```
 
 3. **Clone and install MoxinVLA-OFT**
