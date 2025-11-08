@@ -333,4 +333,3 @@ For questions or issues, please open a [GitHub Issue](https://github.com/arashak
 
 ---
 
-**Made with ❤️ for the robotics and AI community**
