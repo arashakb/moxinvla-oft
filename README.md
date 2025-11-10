@@ -194,6 +194,8 @@ print("Generated action chunk:", actions)
 
 ## 📚 Training & Evaluation
 
+The pretrained model on Open X Embodiment Dataset is available for on Hugging Face at `arashakb/MoxinVLA-OXE-MAGIC-SOUP-440k-PreTrained`. You can use it as the base model. We will upload more training steps soon
+
 ### Fine-tuning on LIBERO
 
 **Using the training script:**
